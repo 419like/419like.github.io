@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>layuiCombogrid插件演示</title>
+    <link rel="stylesheet" type="text/css" href="lib/layui.css">
+</head>
+<style type="text/css">
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.center {
+    margin: auto;
+    width: 600px;
+}
+</style>
+
+<body>
+    <div class="center">
+        <h1>layuiCombogrid</h1>
+        <div id="mycombogrid" value="" style="width:400px;">
+        </div>
+        <div style="color: #b7b79d">
+            使用简介：输入内容回车检索，上下光标可上下移动选项，左右翻页，可手动翻页，回车选中
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="lib/jquery.min.js"></script>
+
+<script src="layui-plus0.1.js"></script>
+<script type="text/javascript">
+let mycombogrid = new Combogrid();
+mycombogrid.init({
+    // 对应要转换为控件的dom对象
+    dom: document.getElementById('mycombogrid'),
+    datagrid: {
+        // 弹出表格的宽度单位PX
+        width: 400,
+        // 写入input对应的列名
+        textField: 'mc',
+        // 列设置其中align有（left、center、right）
+        columns: [{
+            field: 'dm',
+            title: 'dm',
+            width: 60,
+            align: 'left',
+        }, {
+            field: 'id',
+            title: 'id',
+            width: 100,
+            align: 'center',
+        }, {
+            field: 'mc',
+            title: 'mc',
+            width: 120,
+            align: 'center',
+        }, {
+            field: 'rn',
+            title: 'rn',
+            width: 100,
+            align: 'right',
+        }],
+        // 加载成功回调函数
+        loadSuccess: function(keyword, pageNum, pageSize) {
+            let newSrc = {
+                pageNumber: pageNum + '',
+                pageSize: pageSize + '',
+                jsm: keyword,
+                lx: "01"
+            }
+            let param = {
+                "data": JSON.stringify(newSrc)
+            };
+            $.ajax({
+                url: 'http://125.69.67.12:7080/hisapi/rest/queryDataBySql/000217/5',
+                type: "POST",
+                data: param,
+                async: false,
+                success: function(res) {
+                    let dataObj = JSON.parse(res);
+                    // 传入页码信息
+                    let pageInfo = {
+                            pageNum: pageNum,
+                            pageSize: pageSize,
+                            totalPage: Math.ceil(dataObj.data.total / pageSize)
+                        }
+                        // 加载完成写入数据
+                    mycombogrid.setData(dataObj.data.rows, pageInfo);
+                }
+            });
+        },
+        // 行选中回调函数
+        selectRow: function(rowData) {
+            console.log(rowData);
+        }
+    }
+});
+</script>
+
+</html>
